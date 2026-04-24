@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,200..800;1,6..72,200..800&family=Inter:wght@300;400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: "Newsreader", serif;
+  --font-sans: "Inter", sans-serif;
+  
+  --color-parchment: #f5f2ed;
+  --color-ink: #1a1a1a;
+  --color-oxblood: #7d2e2e;
+  --color-stone: #e6e1d8;
+  
+  --radius-sm: 0.125rem;
+  --radius-md: 0.25rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+}
+
+@layer base {
+  body {
+    @apply bg-parchment text-ink font-sans antialiased selection:bg-oxblood/10 selection:text-oxblood;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif font-light tracking-tighter;
+  }
+}
+
+.editorial-card {
+  @apply bg-white/40 border border-ink/10 rounded-sm p-4;
+}
+
+.editorial-nav {
+  @apply text-[11px] uppercase tracking-[0.2em] font-semibold text-ink/60 hover:text-ink transition-colors;
+}
+
+.poem-text {
+  @apply font-serif italic text-lg leading-relaxed text-ink/80;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-ink/10 rounded-full;
+}
+

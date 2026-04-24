@@ -1,0 +1,104 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // 0. Default Deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Phase 3: Primitive Definitions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isSignedIn() && (
+        request.auth.token.email == 'devonhilal@gmail.com' && request.auth.token.email_verified == true
+      );
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Validation Helpers
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'username', 'name']) &&
+             data.id is string && data.id == request.auth.uid &&
+             data.username is string && data.username.size() >= 3 && data.username.size() <= 32 &&
+             data.name is string && data.name.size() <= 64;
+    }
+
+    function isValidPoem(data) {
+      return data.keys().hasAll(['id', 'authorId', 'content']) &&
+             data.authorId == request.auth.uid &&
+             data.title is string && data.title.size() <= 200 &&
+             data.content is string && data.content.size() <= 10000;
+    }
+
+    // 1. Users Collection
+    match /users/{userId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn() && (isAdmin() || request.query.limit <= 20);
+      allow create: if isOwner(userId) && isValidUser(incoming());
+      allow update: if isOwner(userId) && isValidUser(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['username', 'name', 'bio', 'photoUrl', 'skillTags'])
+      );
+    }
+
+    // 2. Poems Collection
+    match /poems/{poemId} {
+      allow get: if true; // Public reading
+      allow list: if true; // Public feed
+      allow create: if isSignedIn() && isValidPoem(incoming()) && isValidId(poemId);
+      allow update: if isOwner(existing().authorId) && isValidPoem(incoming()) && (
+        incoming().diff(existing()).affectedKeys().hasOnly(['title', 'content', 'mood', 'tags', 'upvotes', 'version'])
+      );
+      allow delete: if isOwner(existing().authorId) || isAdmin();
+    }
+
+    // 3. Comments Subcollection
+    match /poems/{poemId}/comments/{commentId} {
+      allow read: if true;
+      allow create: if isSignedIn() && incoming().authorId == request.auth.uid && exists(/databases/$(database)/documents/poems/$(poemId));
+      allow delete: if isOwner(existing().authorId) || isAdmin();
+    }
+
+    // 4. Challenges
+    match /challenges/{challengeId} {
+      allow read: if true;
+      allow write: if isAdmin();
+    }
+
+    // 5. Chats & Messages
+    match /chats/{chatId} {
+      allow get: if isSignedIn() && request.auth.uid in existing().participantIds;
+      allow list: if isSignedIn() && request.auth.uid in existing().participantIds;
+      allow create: if isSignedIn() && request.auth.uid in incoming().participantIds;
+    }
+
+    match /chats/{chatId}/messages/{messageId} {
+      allow read: if isSignedIn() && request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds;
+      allow create: if isSignedIn() && 
+                    request.auth.uid in get(/databases/$(database)/documents/chats/$(chatId)).data.participantIds &&
+                    incoming().senderId == request.auth.uid;
+    }
+  }
+}

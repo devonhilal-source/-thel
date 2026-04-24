@@ -1,0 +1,117 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Represents a poet on the platform.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "username": { "type": "string" },
+        "name": { "type": "string" },
+        "bio": { "type": "string" },
+        "photoUrl": { "type": "string" },
+        "skillTags": { "type": "array", "items": { "type": "string" } },
+        "stats": {
+          "type": "object",
+          "properties": {
+            "posts": { "type": "number" },
+            "votes": { "type": "number" },
+            "challengeWins": { "type": "number" }
+          }
+        }
+      },
+      "required": ["id", "username", "name"]
+    },
+    "Poem": {
+      "title": "Poem",
+      "description": "A poetic work published or drafted by a user.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "authorId": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "mood": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } },
+        "publishedAt": { "type": "string", "format": "date-time" },
+        "upvotes": { "type": "number" },
+        "isDraft": { "type": "boolean" },
+        "version": { "type": "number" }
+      },
+      "required": ["id", "authorId", "content"]
+    },
+    "Comment": {
+      "title": "Comment",
+      "description": "Feedback on a specific poem.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "poemId": { "type": "string" },
+        "authorId": { "type": "string" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "highlightedLines": { "type": "array", "items": { "type": "number" } }
+      }
+    },
+    "Challenge": {
+      "title": "Weekly Challenge",
+      "description": "A scheduled writing prompt.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "prompt": { "type": "string" },
+        "title": { "type": "string" },
+        "deadline": { "type": "string", "format": "date-time" },
+        "imageUrl": { "type": "string" },
+        "issueNumber": { "type": "number" }
+      }
+    },
+    "Message": {
+      "title": "Message",
+      "description": "A piece of correspondence between poets.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "chatId": { "type": "string" },
+        "senderId": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      }
+    },
+    "Chat": {
+      "title": "Chat",
+      "description": "A container for correspondence.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "participantIds": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "Public poet profiles."
+    },
+    "/poems/{poemId}": {
+      "schema": "Poem",
+      "description": "Published poetic works."
+    },
+    "/poems/{poemId}/comments/{commentId}": {
+      "schema": "Comment",
+      "description": "Critiques for a poem."
+    },
+    "/challenges/{challengeId}": {
+      "schema": "Challenge",
+      "description": "Platform-wide challenges."
+    },
+    "/chats/{chatId}": {
+      "schema": "Chat",
+      "description": "Metadata for a conversation."
+    },
+    "/chats/{chatId}/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Individual messages in a chat."
+    }
+  }
+}

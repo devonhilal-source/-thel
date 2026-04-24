@@ -1,0 +1,14 @@
+{
+  "name": "Æthel",
+  "description": "A focused space for poets to publish, collaborate, and grow through structured interaction and real-time correspondence.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "Real-time Collaboration",
+    "Poetry Editor",
+    "Messaging",
+    "Weekly Challenges"
+  ]
+}
